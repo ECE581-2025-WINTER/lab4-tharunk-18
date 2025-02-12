@@ -1,0 +1,37 @@
+proc count_hierarchical_instances_by_ref_name {} {
+    # Get all instances that are not hierarchical
+    set instances [get_cells -quiet -filter "is_hierarchical==false"]
+    
+    # Check if instances list is empty
+    if {[llength $instances] == 0} {
+        puts "No instances found."
+        return
+    }
+
+    # Dictionary to store reference name counts
+    set ref_count [dict create]
+
+    # Count occurrences of each reference name
+    foreach inst $instances {
+        set ref_name [get_attribute $inst ref_name]
+        if {[dict exists $ref_count $ref_name]} {
+            dict incr ref_count $ref_name
+        } else {
+            dict set ref_count $ref_name 1
+        }
+    }
+
+    # Print results sorted in dictionary order
+    foreach ref_name [lsort -dictionary [dict keys $ref_count]] {
+        set count [dict get $ref_count $ref_name]
+        if {[regexp {^logic_} $ref_name]} {
+            puts "**$ref_name** : $count"
+        } else {
+            puts "$ref_name : $count"
+        }
+    }
+}
+
+# Call the procedure
+count_hierarchical_instances_by_ref_name
+
